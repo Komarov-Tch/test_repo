@@ -10,7 +10,7 @@ from static.data import db_session
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'JALIDUJOISD&*ASUJD:*(*)(Ipi9043iokfd;'
 
-
+#комментарий
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
