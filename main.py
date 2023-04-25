@@ -1,7 +1,7 @@
 import json
 import datetime
 from flask import Flask, render_template, redirect, request, make_response, session
-from flask_login import LoginManager
+from flask_login import LoginManager, login_user
 from static.forms.loginform import LoginForm
 from static.forms.user import RegisterForm
 from static.data.news import News
@@ -62,7 +62,15 @@ def cookie_test():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        return redirect('/success')
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            return redirect('/')
+        return render_template('login.html',
+                               message='Неправильный логин или пароль',
+                               form=form,
+                               title='Авторизация')
     return render_template('login.html', title='Авторизаци', form=form)
 
 
