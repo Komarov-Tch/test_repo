@@ -1,6 +1,7 @@
 import json
-
-from flask import Flask, render_template, redirect
+import datetime
+from flask import Flask, render_template, redirect, request, make_response, session
+from flask_login import LoginManager
 from static.forms.loginform import LoginForm
 from static.forms.user import RegisterForm
 from static.data.news import News
@@ -8,9 +9,18 @@ from static.data.users import User
 from static.data import db_session
 
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
 app.config['SECRET_KEY'] = 'JALIDUJOISD&*ASUJD:*(*)(Ipi9043iokfd;'
 
-#комментарий
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).fet(user_id)
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
@@ -39,6 +49,13 @@ def register():
     return render_template('register.html',
                            title='Регистрация',
                            form=form)
+
+
+@app.route('/cookie_test')
+def cookie_test():
+    visits_count = session.get('visits_count', 0)
+    session['visits_count'] = visits_count + 1
+    return make_response(f'Вы зашли на эту страницу {visits_count + 1} раз')
 
 
 @app.route('/login', methods=['GET', 'POST'])
